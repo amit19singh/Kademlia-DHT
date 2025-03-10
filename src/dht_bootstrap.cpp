@@ -16,7 +16,7 @@
     void init_winsock() {
         WSADATA wsaData;
         if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-            std::cerr << "Failed to initialize Winsock!" << std::endl;
+            std::cerr << "Failed to initialize Winsock!" << '\n';
             exit(1);
         }
     }
@@ -53,9 +53,9 @@ namespace DHT {
         sock_ = socket(AF_INET, SOCK_DGRAM, 0);
         if (sock_ < 0) {
 #ifdef _WIN32
-            std::cerr << "Error creating socket! Winsock error: " << WSAGetLastError() << std::endl;
+            std::cerr << "Error creating socket! Winsock error: " << WSAGetLastError() << '\n';
 #else
-            std::cerr << "Error creating socket! errno: " << strerror(errno) << std::endl;
+            std::cerr << "Error creating socket! errno: " << strerror(errno) << '\n';
 #endif
             exit(1);
         }
@@ -68,14 +68,14 @@ namespace DHT {
 
         if (bind(sock_, reinterpret_cast<sockaddr*>(&local_addr), sizeof(local_addr)) < 0) {
 #ifdef _WIN32
-            std::cerr << "Error binding socket! Winsock error: " << WSAGetLastError() << std::endl;
+            std::cerr << "Error binding socket! Winsock error: " << WSAGetLastError() << '\n';
 #else
-            std::cerr << "Error binding socket! errno: " << strerror(errno) << std::endl;
+            std::cerr << "Error binding socket! errno: " << strerror(errno) << '\n';
 #endif
             exit(1);
         }
 
-        std::cout << "DHT Node started on Port: " << DHT_PORT << std::endl;
+        std::cout << "DHT Node started on Port: " << DHT_PORT << '\n';
 
         // Create the first bucket in the routing table.
         routing_table_.emplace_back();
@@ -105,7 +105,7 @@ namespace DHT {
 
         for (const auto& bootstrap_node : bootstrap_nodes_) {
             std::cout << "Contacting bootstrap node: " << bootstrap_node.ip 
-                      << ":" << bootstrap_node.port << std::endl;
+                      << ":" << bootstrap_node.port << '\n';
 
             // Send a FIND_NODE request to the bootstrap node
             auto nodes = send_find_node_request(bootstrap_node, my_node_id_);
@@ -197,9 +197,9 @@ namespace DHT {
         int sock = socket(AF_INET, SOCK_DGRAM, 0);
         if (sock < 0) {
 #ifdef _WIN32
-            std::cerr << "Error creating socket! Winsock error: " << WSAGetLastError() << std::endl;
+            std::cerr << "Error creating socket! Winsock error: " << WSAGetLastError() << '\n';
 #else
-            std::cerr << "Error creating socket! errno: " << strerror(errno) << std::endl;
+            std::cerr << "Error creating socket! errno: " << strerror(errno) << '\n';
 #endif
             return nodes;
         }
@@ -222,7 +222,7 @@ namespace DHT {
         inet_pton(AF_INET, remote_node.ip.c_str(), &remote_addr.sin_addr);
 
         std::cout << "Sending FIND_NODE request to: " 
-                  << remote_node.ip << ":" << remote_node.port << std::endl;
+                  << remote_node.ip << ":" << remote_node.port << '\n';
 
         // Create the request message using bencode
         BencodedDict query;
@@ -237,16 +237,16 @@ namespace DHT {
 
         std::string request = BencodeEncoder::encode(message);
 
-        std::cout << "Request: " << request << std::endl;
-        std::cout << "Sending: " << request.size() << " bytes -> " << request << std::endl;
+        std::cout << "Request: " << request << '\n';
+        std::cout << "Sending: " << request.size() << " bytes -> " << request << '\n';
 
         // Send the FIND_NODE request
         if (sendto(sock, request.c_str(), request.size(), 0,
                    (struct sockaddr*)&remote_addr, sizeof(remote_addr)) < 0) {
 #ifdef _WIN32
-            std::cerr << "Sendto failed! Winsock error: " << WSAGetLastError() << std::endl;
+            std::cerr << "Sendto failed! Winsock error: " << WSAGetLastError() << '\n';
 #else
-            std::cerr << "Sendto failed! errno: " << strerror(errno) << std::endl;
+            std::cerr << "Sendto failed! errno: " << strerror(errno) << '\n';
 #endif
             CLOSESOCKET(sock);
             return nodes;
@@ -257,14 +257,14 @@ namespace DHT {
         sockaddr_in sender_addr{};
         socklen_t sender_len = sizeof(sender_addr);
 
-        std::cout << "Waiting for response..." << std::endl;
+        std::cout << "Waiting for response..." << '\n';
         int bytes_received = recvfrom(sock, buffer, sizeof(buffer), 0,
                                       (struct sockaddr*)&sender_addr, &sender_len);
         if (bytes_received < 0) {
 #ifdef _WIN32
-            std::cerr << "recvfrom failed! Winsock error: " << WSAGetLastError() << std::endl;
+            std::cerr << "recvfrom failed! Winsock error: " << WSAGetLastError() << '\n';
 #else
-            std::cerr << "recvfrom failed! errno: " << strerror(errno) << std::endl;
+            std::cerr << "recvfrom failed! errno: " << strerror(errno) << '\n';
 #endif
         }
 
@@ -272,7 +272,7 @@ namespace DHT {
         if (bytes_received > 0) {
             std::cout << "Received " << bytes_received << " bytes from "
                       << inet_ntoa(sender_addr.sin_addr) << ":"
-                      << ntohs(sender_addr.sin_port) << std::endl;
+                      << ntohs(sender_addr.sin_port) << '\n';
 
             try {
                 BencodeParser parser;
@@ -285,10 +285,10 @@ namespace DHT {
                     parse_compact_nodes(nodes_str, nodes);
                 }
             } catch (const std::exception& e) {
-                std::cerr << "Error parsing response: " << e.what() << std::endl;
+                std::cerr << "Error parsing response: " << e.what() << '\n';
             }
         } else {
-            std::cerr << "No response received!" << std::endl;
+            std::cerr << "No response received!" << '\n';
         }
 
         CLOSESOCKET(sock);
@@ -387,7 +387,7 @@ namespace DHT {
         // Create a UDP socket
         int sock = socket(AF_INET, SOCK_DGRAM, 0);
         if (sock < 0) {
-            std::cerr << "Error creating socket!" << std::endl;
+            std::cerr << "Error creating socket!" << '\n';
             return false;
         }
 
@@ -463,10 +463,10 @@ namespace DHT {
 
             std::cout << "Sent PONG response to: "
                       << inet_ntoa(sender_addr.sin_addr) << ":" 
-                      << ntohs(sender_addr.sin_port) << std::endl;
-            std::cout << "PONG RESPONSE: \n" << response_str << std::endl;
+                      << ntohs(sender_addr.sin_port) << '\n';
+            std::cout << "PONG RESPONSE: \n" << response_str << '\n';
         } catch (const std::exception& e) {
-            std::cerr << "Error handling ping request: " << e.what() << std::endl;
+            std::cerr << "Error handling ping request: " << e.what() << '\n';
         }
     }
 
@@ -520,10 +520,10 @@ namespace DHT {
 
             std::cout << "************Sent FIND_NODE response to: "
                       << inet_ntoa(sender_addr.sin_addr) << ":" << ntohs(sender_addr.sin_port) 
-                      << std::endl
-                      << "Response sent: " << response_str << std::endl;
+                      << '\n'
+                      << "Response sent: " << response_str << '\n';
         } catch (const std::exception& e) {
-            std::cerr << "Error handling find_node request: " << e.what() << std::endl;
+            std::cerr << "Error handling find_node request: " << e.what() << '\n';
         }
     }
 
@@ -637,7 +637,7 @@ namespace DHT {
 
                 std::cout << "Sent GET_PEERS response (peers) to: "
                           << inet_ntoa(sender_addr.sin_addr) << ":" 
-                          << ntohs(sender_addr.sin_port) << std::endl;
+                          << ntohs(sender_addr.sin_port) << '\n';
             } else {
                 // Return the K closest nodes
                 NodeID target_id;
@@ -659,11 +659,11 @@ namespace DHT {
 
                 std::cout << "Sent GET_PEERS response (nodes) to: "
                           << inet_ntoa(sender_addr.sin_addr) << ":" 
-                          << ntohs(sender_addr.sin_port) << std::endl;
-                std::cout << "RESPONSE STRING - GET PEERS:\n" << response_str << std::endl;
+                          << ntohs(sender_addr.sin_port) << '\n';
+                std::cout << "RESPONSE STRING - GET PEERS:\n" << response_str << '\n';
             }
         } catch (const std::exception& e) {
-            std::cerr << "Error handling get_peers request: " << e.what() << std::endl;
+            std::cerr << "Error handling get_peers request: " << e.what() << '\n';
         }
     }
 
@@ -706,7 +706,7 @@ namespace DHT {
             // Log the announcement
             std::cout << "Stored peer " << peer.ip << ":" << peer.port
                       << " for infohash "
-                      << node_id_to_hex(string_to_node_id(infohash)) << std::endl;
+                      << node_id_to_hex(string_to_node_id(infohash)) << '\n';
 
             // Send a response
             BencodedDict response;
@@ -722,9 +722,9 @@ namespace DHT {
 
             std::cout << "Sent ANNOUNCE_PEER response to: "
                       << inet_ntoa(sender_addr.sin_addr) << ":"
-                      << ntohs(sender_addr.sin_port) << std::endl;
+                      << ntohs(sender_addr.sin_port) << '\n';
         } catch (const std::exception& e) {
-            std::cerr << "Error handling announce_peer request: " << e.what() << std::endl;
+            std::cerr << "Error handling announce_peer request: " << e.what() << '\n';
         }
     }
 
@@ -744,23 +744,23 @@ namespace DHT {
             if (bytes_received < 0) {
 #ifdef _WIN32
                 int wsa_error = WSAGetLastError();
-                std::cerr << "recvfrom failed! WSA Error Code: " << wsa_error << std::endl;
+                std::cerr << "recvfrom failed! WSA Error Code: " << wsa_error << '\n';
 #else
-                std::cerr << "recvfrom failed! errno: " << strerror(errno) << std::endl;
+                std::cerr << "recvfrom failed! errno: " << strerror(errno) << '\n';
 #endif
                 continue;
             }
 
             std::cout << "[DHT] Received " << bytes_received << " bytes from "
                       << inet_ntoa(sender_addr.sin_addr) << ":"
-                      << ntohs(sender_addr.sin_port) << std::endl;
+                      << ntohs(sender_addr.sin_port) << '\n';
 
             // Log raw message in hex format
             std::cout << "[DHT] Raw Data: ";
             for (int i = 0; i < bytes_received; i++) {
                 printf("%02x ", (unsigned char)buffer[i]);
             }
-            std::cout << std::endl;
+            std::cout << '\n';
 
             // Parse the message
             try {
@@ -768,42 +768,42 @@ namespace DHT {
                 std::string message_str(buffer, bytes_received);
                 BencodedValue message = parser.parse(message_str);
 
-                std::cout << "[DHT] Parsed Message: " << message_str << std::endl;
+                std::cout << "[DHT] Parsed Message: " << message_str << '\n';
 
                 // Extract the message type
                 std::string message_type = message.asDict().at("y").asString();
 
                 if (message_type == "q") {  // Query message
                     std::string query_type = message.asDict().at("q").asString();
-                    std::cout << "[DHT] Query Type: " << query_type << std::endl;
+                    std::cout << "[DHT] Query Type: " << query_type << '\n';
 
                     if (query_type == "ping") {
                         std::cout << "[DHT] Handling PING request from "
                                   << inet_ntoa(sender_addr.sin_addr) << ":"
-                                  << ntohs(sender_addr.sin_port) << std::endl;
+                                  << ntohs(sender_addr.sin_port) << '\n';
                         handle_ping(message, sender_addr);
 
                     } else if (query_type == "find_node") {
-                        std::cout << "[DHT] Handling FIND_NODE request" << std::endl;
+                        std::cout << "[DHT] Handling FIND_NODE request" << '\n';
                         handle_find_node(message, sender_addr);
 
                     } else if (query_type == "get_peers") {
-                        std::cout << "[DHT] Handling GET_PEERS request" << std::endl;
+                        std::cout << "[DHT] Handling GET_PEERS request" << '\n';
                         handle_get_peers(message, sender_addr);
 
                     } else if (query_type == "announce_peer") {
-                        std::cout << "[DHT] Handling ANNOUNCE_PEER request" << std::endl;
+                        std::cout << "[DHT] Handling ANNOUNCE_PEER request" << '\n';
                         handle_announce_peer(message, sender_addr);
                     }
 
                 } else if (message_type == "r") {  // Response message
-                    std::cout << "[DHT] Received RESPONSE message" << std::endl;
+                    std::cout << "[DHT] Received RESPONSE message" << '\n';
 
                 } else if (message_type == "e") {  // Error message
-                    std::cout << "[DHT] Received ERROR message" << std::endl;
+                    std::cout << "[DHT] Received ERROR message" << '\n';
                 }
             } catch (const std::exception& e) {
-                std::cerr << "[DHT] Error parsing message: " << e.what() << std::endl;
+                std::cerr << "[DHT] Error parsing message: " << e.what() << '\n';
             }
         }
     }
